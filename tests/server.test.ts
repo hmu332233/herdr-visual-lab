@@ -3,10 +3,8 @@ import os from 'node:os';
 import path from 'node:path';
 import { WebSocket } from 'ws';
 import { afterEach, describe, expect, it } from 'vitest';
-import { createRaceBroadcaster } from '../src/server/broadcaster.js';
-import { createRaceSession } from '../src/server/race-session.js';
-import { createEventLog } from '../src/server/event-log.js';
-import { createSessionHub } from '../src/server/session-hub.js';
+import { createEventBroadcaster } from '../src/server/broadcaster.js';
+import { createEventSession } from '../src/server/event-session.js';
 import { loadFixture } from '../src/server/fixtures.js';
 import { startServer } from '../src/server/server.js';
 import type { ServerMessage, SyncMessage } from '../src/shared/protocol.js';
@@ -20,10 +18,9 @@ async function makeServer(onFocus: (id: string) => void = () => {}): Promise<Das
   webRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'herdr-f1-web-'));
   fs.writeFileSync(path.join(webRoot, 'index.html'), '<!doctype html><title>Herdr F1</title>');
   fs.writeFileSync(path.join(webRoot, 'app.js'), 'console.log(1)');
-  const session = createRaceSession();
-  const log = createEventLog();
-  loadFixture('grid', createSessionHub(session, log));
-  const broadcaster = createRaceBroadcaster(session, () => 1000, log);
+  const session = createEventSession();
+  loadFixture('grid', session);
+  const broadcaster = createEventBroadcaster(session, () => 1000);
   dashboard = await startServer({ port: 4990, webRoot, broadcaster, onFocus });
   return dashboard;
 }
@@ -61,7 +58,8 @@ describe('startServer', () => {
     await waitUntil(() => messages.length >= 2);
     expect(messages[0].type).toBe('history');
     expect(messages[1].type).toBe('sync');
-    expect((messages[1] as SyncMessage).teams.length).toBe(4);
+    expect((messages[1] as SyncMessage).events).toEqual([]);
+    expect((messages[0] as { events: unknown[] }).events.length).toBeGreaterThan(0);
     socket.send(JSON.stringify({ type: 'focus', terminalID: 't6' }));
     await waitUntil(() => focused.length === 1);
     expect(focused[0]).toBe('t6');
@@ -71,8 +69,8 @@ describe('startServer', () => {
 
   it('probes the next port when the preferred one is taken', async () => {
     const first = await makeServer();
-    const session = createRaceSession();
-    const broadcaster = createRaceBroadcaster(session, () => 0, createEventLog());
+    const session = createEventSession();
+    const broadcaster = createEventBroadcaster(session, () => 0);
     const second = await startServer({ port: first.port, webRoot, broadcaster, onFocus: () => {} });
     try {
       expect(second.port).toBe(first.port + 1);

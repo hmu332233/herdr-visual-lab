@@ -1,5 +1,5 @@
-import type { SyncMessage } from '../../../shared/protocol.js';
-import type { FinalResult } from '../../../shared/presentation.js';
+import type { F1View as SyncMessage } from './view.js';
+import type { FinalResult } from '../../presentation.js';
 import { palette, teamColor } from '../../palette.js';
 import { distanceText, headerLap } from './vocabulary.js';
 

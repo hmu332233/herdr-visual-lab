@@ -1,4 +1,4 @@
-import type { EntryPresentation, TeamColorToken } from '../shared/presentation.js';
+import type { EntryPresentation, TeamColorToken } from './presentation.js';
 
 export const palette = {
   canvas: '#0A0C10',

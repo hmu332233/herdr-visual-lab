@@ -41,7 +41,8 @@ Herdr `session.snapshot`에서 가져오는 실제 정보:
 - 팀 점수와 포디엄
 - Grand Prix 결과
 
-가상 정보는 CLI 프로세스가 살아 있는 동안만 메모리에 유지됩니다. 생산성,
+가상 정보는 각 브라우저 탭이 서버의 중립 이벤트 저널을 폴드해 결정하며, 저널은
+CLI 프로세스가 살아 있는 동안만 메모리에 유지됩니다. 생산성,
 진행률, 메시지 수 또는 token 사용량을 나타내지 않으며 프로세스를 다시 실행하면
 모두 초기화됩니다.
 
@@ -108,7 +109,11 @@ URL 쿼리로 고릅니다 — 서버는 관여하지 않으므로 한 탭은 F1
 http://localhost:4158/            # 기본 F1
 http://localhost:4158/?game=f1    # F1 (서킷 레이스)
 http://localhost:4158/?game=raid  # 레이드 보스 (누적 진행 = 보스 HP)
+http://localhost:4158/?game=foundry # Orbital Foundry
 ```
+
+Defense 포맷은 폐기되었습니다. 해당 이름을 포함한 알 수 없는 포맷 값은
+일반 fallback 규칙에 따라 F1을 표시합니다.
 
 새 포맷은 `src/web/formats/<name>/` 디렉터리 하나로 추가합니다. 서버와 프로토콜은
 게임 어휘를 전혀 알지 못합니다.
@@ -126,8 +131,13 @@ http://localhost:4158/?game=raid  # 레이드 보스 (누적 진행 = 보스 HP)
 
 ## 구조와 로컬 보안
 
-Node 서버가 Herdr Unix socket에 연결하고 레이스 상태를 소유합니다. 브라우저는
-WebSocket으로 같은 상태를 받아 렌더링하는 관전자입니다. 서버는 terminal focus를
+Node 서버가 Herdr Unix socket에 연결하고 프로세스 수명 동안 완전한 게임 중립 이벤트
+저널을 소유합니다. 20,000건을 넘어도 기록을 버리지 않으며, 각 브라우저 탭은 전체
+history와 seq가 연속인 delta를 폴드해 F1/Raid/Foundry 상태를 독립적으로 만듭니다.
+`--speed`는 1초 cap이 적용된 wall time이 중립 `timelineTime`을 늘리는 비율이며 tick
+레코드를 만들지 않습니다. 프로세스를 재시작하면 새 저널이 시작됩니다.
+
+서버는 terminal focus를
 제어할 수 있으므로 외부 네트워크에 노출하지 않고 `127.0.0.1`에만 바인딩합니다.
 terminal 출력 polling, session log parsing 또는 레이스 기록 저장은 하지 않습니다.
 

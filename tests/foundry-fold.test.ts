@@ -7,9 +7,9 @@ function fold(...items: Array<{ at: number; body: GameEventBody }>) {
     .reduce(foldFoundry, initialFoundry());
 }
 
-const team: GameEventBody = { kind: 'team-joined', team: { id: 'a', label: 'alpha' } };
+const team: GameEventBody = { kind: 'team-joined', team: { id: 'a', label: 'alpha', sourceOrder: 0, stableOrder: 0 } };
 const unit: GameEventBody = { kind: 'unit-joined', unit: {
-  id: 'u', teamID: 'a', tabLabel: 'core', agentKind: 'codex', status: 'working',
+  id: 'u', teamID: 'a', tabLabel: 'core', agentKind: 'codex', status: 'working', isFocused: false, sourceOrder: 0, stableOrder: 0,
 } };
 
 describe('Orbital Foundry fold', () => {

@@ -1,13 +1,3 @@
-import type { GameFormat } from '../../format.js';
-import { createChrome } from './chrome.js';
-import { createStandingsPanel } from './standings.js';
-import { createRaidScene } from './scene.js';
-
-/** Raid boss: the same neutral session, reinterpreted. Cumulative progress is
- *  damage, the leader's progress is the boss health bar, the round is the
- *  stage. Nothing on the server or protocol knows any of this. */
-export const raidFormat: GameFormat = {
-  createChrome: () => createChrome(),
-  createStandings: (el, onFocus) => createStandingsPanel(el, onFocus),
-  createScene: (canvas, onFocus) => createRaidScene(canvas, onFocus),
-};
+import type { GameEvent } from '../../../shared/events.js';import type { TimelineCursor } from '../../../shared/protocol.js';import type { GameFormat } from '../../format.js';import { createChrome } from './chrome.js';import { createStandingsPanel } from './standings.js';import { createRaidScene } from './scene.js';import { foldRaid,initialRaidState,setRaidCursor } from './fold.js';import { projectRaid } from './view.js';
+export function createRaidStateOwner(){let state=initialRaidState();return{onEvents(events:readonly GameEvent[],reset:boolean){if(reset)state=initialRaidState();for(const event of events)foldRaid(state,event);},onTimeline(cursor:TimelineCursor){setRaidCursor(state,cursor);},view:()=>projectRaid(state)};}
+export function createRaidFormat():GameFormat{const owner=createRaidStateOwner();return{onEvents:owner.onEvents,onTimeline:owner.onTimeline,createChrome(){const c=createChrome();return{render:()=>c.render(owner.view())};},createStandings(el,onFocus){const c=createStandingsPanel(el,onFocus);return{render:()=>c.render(owner.view())};},createScene(canvas,onFocus){const c=createRaidScene(canvas,onFocus);return{commit:(at)=>c.setSync(owner.view(),at),frame:c.frame,resize:c.resize};}};}

@@ -1,5 +1,6 @@
-import type { EntryPresentation } from '../../../shared/presentation.js';
-import { progressTarget } from '../../../shared/rules.js';
+import type { EntryPresentation } from '../../presentation.js';
+import { RaidRules } from './rules.js';
+const progressTarget = RaidRules.bossHealth;
 
 /** Raid-boss vocabulary: pure reinterpretations of the game-neutral data.
  *  Cumulative progress is damage; the leader's progress toward the target is

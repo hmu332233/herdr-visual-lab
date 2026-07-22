@@ -1,5 +1,5 @@
-import type { SyncMessage } from '../../../shared/protocol.js';
-import type { FinalResult } from '../../../shared/presentation.js';
+import type { RaidView as SyncMessage } from './view.js';
+import type { FinalResult } from '../../presentation.js';
 import { palette, teamColor } from '../../palette.js';
 import { bossHpFraction, damageText, overlayLabel, stageLabel } from './vocabulary.js';
 

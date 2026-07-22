@@ -1,5 +1,7 @@
-import type { EntryPresentation } from '../../../shared/presentation.js';
-import { baseProgressDuration, progressTarget } from '../../../shared/rules.js';
+import type { EntryPresentation } from '../../presentation.js';
+import { F1Rules } from './rules.js';
+const baseProgressDuration = F1Rules.baseLapDuration;
+const progressTarget = F1Rules.totalLaps;
 
 /** F1 vocabulary: the pure text/derivation logic that used to live in the
  *  server's present()/rankedTeams(). Moved here verbatim so the F1 screen

@@ -1,4 +1,4 @@
-import type { AgentStatus } from '../../../shared/presentation.js';
+import type { AgentStatus, ConnectionState } from '../../../shared/presentation.js';
 import type { GameEvent } from '../../../shared/events.js';
 
 export interface FoundryWorker {
@@ -18,6 +18,7 @@ export interface FoundryState {
   teams: Map<string, { label: string; colorSlot: number }>;
   workers: Map<string, FoundryWorker>;
   lastEventAt: number;
+  connection: ConnectionState;
 }
 
 export interface FoundryTeamProjection {
@@ -34,7 +35,7 @@ export interface FoundryTeamProjection {
 }
 
 export function initialFoundry(): FoundryState {
-  return { teams: new Map(), workers: new Map(), lastEventAt: 0 };
+  return { teams: new Map(), workers: new Map(), lastEventAt: 0, connection: { kind: 'waiting' } };
 }
 
 function settle(worker: FoundryWorker, at: number): void {
@@ -52,6 +53,10 @@ export function foldFoundry(state: FoundryState, event: GameEvent): FoundryState
         state.teams.set(event.team.id, { label: event.team.label, colorSlot: state.teams.size });
       }
       break;
+    case 'connection-changed': state.connection = event.connection; break;
+    case 'team-updated': { const team = state.teams.get(event.teamID); if (team) team.label = event.label; break; }
+    case 'unit-profile-changed': { const worker = state.workers.get(event.unitID); if (worker) { worker.teamID = event.profile.teamID; worker.label = event.profile.tabLabel; } break; }
+    case 'snapshot-applied': break;
     case 'unit-joined': {
       const existing = state.workers.get(event.unit.id);
       if (existing) {
@@ -83,7 +88,7 @@ export function foldFoundry(state: FoundryState, event: GameEvent): FoundryState
       if (worker) { settle(worker, event.at); worker.departed = true; }
       break;
     }
-    case 'stint-started': {
+    case 'unit-session-restarted': {
       const worker = state.workers.get(event.unitID);
       if (worker) worker.completions += 1;
       break;

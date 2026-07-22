@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import type { AgentStatus, EntryPresentation } from '../src/shared/presentation.js';
-import { progressTarget } from '../src/shared/rules.js';
+import type { AgentStatus } from '../src/shared/presentation.js';
+import type { EntryPresentation } from '../src/web/presentation.js';
+import { RaidRules } from '../src/web/formats/raid/rules.js';
+const progressTarget = RaidRules.bossHealth;
 import {
   bossHpFraction, damageOf, damageText, dpsGapText, overlayLabel, stageLabel, statusLabel,
 } from '../src/web/formats/raid/vocabulary.js';

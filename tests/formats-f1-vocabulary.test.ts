@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import type { AgentStatus, EntryPresentation } from '../src/shared/presentation.js';
+import type { AgentStatus } from '../src/shared/presentation.js';
+import type { EntryPresentation } from '../src/web/presentation.js';
 import {
   distanceText, gapText, headerLap, lapOf, statusText,
 } from '../src/web/formats/f1/vocabulary.js';

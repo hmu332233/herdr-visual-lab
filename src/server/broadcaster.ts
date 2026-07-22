@@ -1,71 +1,14 @@
-import type { RaceSession } from './race-session.js';
-import type { EventLog } from './event-log.js';
 import type { GameEvent } from '../shared/events.js';
 import type { HistoryMessage, SyncMessage } from '../shared/protocol.js';
-
-/**
- * Owns the server-side tick: advances the race session on a fixed cadence and
- * fans full sync messages out to connected browsers.
- */
-export function createRaceBroadcaster(
-  session: RaceSession,
-  clock: () => number,
-  log: EventLog,
-  tickMs = 250,
-) {
-  let timer: ReturnType<typeof setInterval> | null = null;
-  const clients = new Set<(json: string) => void>();
-  let broadcastSeq = 0;
-
-  function start(): void {
-    if (timer) return;
-    timer = setInterval(tick, tickMs);
-  }
-
-  function stop(): void {
-    if (timer) {
-      clearInterval(timer);
-      timer = null;
-    }
-  }
-
-  function addClient(send: (json: string) => void): void {
-    clients.add(send);
-    const now = clock();
-    session.advance(now);
-    send(JSON.stringify(buildHistory()));
-    send(JSON.stringify(buildSync([])));
-  }
-
-  function removeClient(send: (json: string) => void): void {
-    clients.delete(send);
-  }
-
-  /** One cadence step. Public so tests can drive it with a manual clock. */
-  function tick(): void {
-    const now = clock();
-    session.advance(now);
-    if (clients.size === 0) return; // race continues; nothing to fan out
-    const events = log.eventsSince(broadcastSeq);
-    broadcastSeq = log.lastSeq();
-    const json = JSON.stringify(buildSync(events));
-    for (const send of clients) send(json);
-  }
-
-  function buildHistory(): HistoryMessage {
-    return {
-      type: 'history',
-      serverTime: clock(),
-      droppedBefore: log.droppedBefore(),
-      events: log.history(),
-    };
-  }
-
-  function buildSync(events: GameEvent[] = []): SyncMessage {
-    return { type: 'sync', serverTime: clock(), events, ...session.presentation() };
-  }
-
-  return { start, stop, addClient, removeClient, tick, buildSync, buildHistory };
+import type { EventSession } from './event-session.js';
+export function createEventBroadcaster(session:EventSession,clock:()=>number,tickMs=250){let timer:ReturnType<typeof setInterval>|null=null;const clients=new Set<(json:string)=>void>();let broadcastSeq=0;
+  const cursor=()=>({timelineTime:session.timelineTime(),timelineRate:session.timelineRate()});
+  const buildHistory=():HistoryMessage=>({type:'history',serverTime:clock(),events:session.log.history(),...cursor()});
+  const buildSync=(events:GameEvent[]=[]):SyncMessage=>({type:'sync',serverTime:clock(),events,...cursor()});
+  function start(){if(!timer)timer=setInterval(tick,tickMs);}function stop(){if(timer){clearInterval(timer);timer=null;}}
+  function addClient(send:(json:string)=>void){const wasEmpty=clients.size===0;clients.add(send);session.advance(clock());const history=buildHistory();send(JSON.stringify(history));if(wasEmpty)broadcastSeq=session.log.lastSeq();send(JSON.stringify(buildSync()));}
+  function removeClient(send:(json:string)=>void){clients.delete(send);}
+  function tick(){session.advance(clock());if(!clients.size)return;const events=session.log.eventsSince(broadcastSeq);broadcastSeq=session.log.lastSeq();const json=JSON.stringify(buildSync(events));for(const send of clients)send(json);}
+  return{start,stop,addClient,removeClient,tick,buildHistory,buildSync};
 }
-
-export type RaceBroadcaster = ReturnType<typeof createRaceBroadcaster>;
+export type EventBroadcaster=ReturnType<typeof createEventBroadcaster>;

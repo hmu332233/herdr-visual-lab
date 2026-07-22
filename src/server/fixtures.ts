@@ -1,21 +1,23 @@
-import type { RaceSession } from './race-session.js';
-import { stableHash } from './rules.js';
+import type { EventSession } from './event-session.js';
+import { stableHash } from '../shared/deterministic.js';
 import type { AgentStatus, ConnectionState } from '../shared/presentation.js';
 import type { SourceAgent, SourceSnapshot } from './herdr/types.js';
 
 export const FIXTURE_NAMES = ['grid', 'dense', 'redflag', 'error', 'podium'] as const;
 
 /** Deterministic grids used to review the dashboard without a live herdr. */
-export function loadFixture(name: string, session: RaceSession): void {
+export function loadFixture(name: string, session: EventSession): { finalNow: number } {
+  let finalNow: number;
   switch (name) {
-    case 'dense': dense(session); break;
-    case 'redflag': connectionFixture(session, { kind: 'offline' }); break;
+    case 'dense': finalNow = dense(session); break;
+    case 'redflag': finalNow = connectionFixture(session, { kind: 'offline' }); break;
     case 'error':
-      connectionFixture(session, { kind: 'protocolError', detail: 'Unsupported Herdr protocol 999' });
+      finalNow = connectionFixture(session, { kind: 'protocolError', detail: 'Unsupported Herdr protocol 999' });
       break;
-    case 'podium': podium(session); break;
-    default: grid(session);
+    case 'podium': finalNow = resultPreview(session); break;
+    default: finalNow = grid(session);
   }
+  return { finalNow };
 }
 
 type TeamSpec = [id: string, label: string, agents: SourceAgent[]];
@@ -36,7 +38,7 @@ function snapshot(teams: TeamSpec[]): SourceSnapshot {
 
 /** Boots a live race, lets everyone work for staggered spans so distances
  *  spread out, then applies the final statuses. */
-function race(session: RaceSession, teams: TeamSpec[], seconds: number): void {
+function race(session: EventSession, teams: TeamSpec[], seconds: number): number {
   const asWorking = (a: SourceAgent): SourceAgent => ({ ...a, status: 'working' });
   const working = teams.map(([id, label, agents]) => [id, label, agents.map(asWorking)] as TeamSpec);
   session.applySnapshot(snapshot(working), 0);
@@ -64,6 +66,7 @@ function race(session: RaceSession, teams: TeamSpec[], seconds: number): void {
     );
     session.applySnapshot(snapshot(mixed), now);
   });
+  return now;
 }
 
 function standardTeams(): TeamSpec[] {
@@ -91,11 +94,11 @@ function standardTeams(): TeamSpec[] {
   ];
 }
 
-function grid(session: RaceSession): void {
-  race(session, standardTeams(), 400);
+function grid(session: EventSession): number {
+  return race(session, standardTeams(), 400);
 }
 
-function dense(session: RaceSession): void {
+function dense(session: EventSession): number {
   const statuses: AgentStatus[] = ['working', 'working', 'idle', 'done', 'blocked'];
   const teams: TeamSpec[] = Array.from({ length: 14 }, (_, index) => {
     const id = `ws-${index}`;
@@ -105,19 +108,18 @@ function dense(session: RaceSession): void {
         slot % 2 === 0 ? 'claude' : 'codex', statuses[(index + slot) % statuses.length]));
     return [id, label, agents];
   });
-  race(session, teams, 300);
+  return race(session, teams, 300);
 }
 
-function connectionFixture(session: RaceSession, state: ConnectionState): void {
+function connectionFixture(session: EventSession, state: ConnectionState): number {
   race(session, standardTeams(), 400);
   session.applyConnection(state, 500);
+  return 500;
 }
 
-function podium(session: RaceSession): void {
+function resultPreview(session: EventSession): number {
   race(session, standardTeams(), 120);
   let now = 500;
-  while (session.presentation().phase === 'live' && now < 500 + 60 * 60) {
-    now += 1;
-    session.advance(now);
-  }
+  while (now < 1028) session.advance(++now);
+  return now;
 }

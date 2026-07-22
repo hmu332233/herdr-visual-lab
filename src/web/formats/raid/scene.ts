@@ -1,7 +1,7 @@
-import type { SyncMessage } from '../../../shared/protocol.js';
-import type { EntryPresentation } from '../../../shared/presentation.js';
+import type { RaidView as SyncMessage } from './view.js';
+import type { EntryPresentation } from '../../presentation.js';
 import { contrastText, hexAlpha, palette, teamColor } from '../../palette.js';
-import { extrapolateProgress } from '../../state.js';
+import { extrapolateProgress } from '../../presentation.js';
 import { bossHpFraction } from './vocabulary.js';
 
 // Fixed logical scene, aspect-fitted into the canvas (mirrors the F1 scene).

@@ -3,7 +3,7 @@ import http from 'node:http';
 import path from 'node:path';
 import { setImmediate } from 'node:timers/promises';
 import { WebSocketServer } from 'ws';
-import type { RaceBroadcaster } from './broadcaster.js';
+import type { EventBroadcaster } from './broadcaster.js';
 import type { ClientMessage } from '../shared/protocol.js';
 
 const MIME: Record<string, string> = {
@@ -27,7 +27,7 @@ export interface DashboardServer {
 export interface ServerOptions {
   port: number;
   webRoot: string;
-  broadcaster: RaceBroadcaster;
+  broadcaster: EventBroadcaster;
   onFocus: (terminalID: string) => void;
 }
 

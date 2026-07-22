@@ -1,14 +1,12 @@
-import type { SyncMessage } from '../../../shared/protocol.js';
+import type { FoundryView } from './index.js';
 import { contrastText, hexAlpha, palette } from '../../palette.js';
-import { projectFoundry, type FoundryState } from './fold.js';
 
 export function createStandingsPanel(
   container: HTMLElement,
   _onFocus: (terminalID: string) => void,
-  getState: () => FoundryState,
 ) {
-  function render(sync: SyncMessage): void {
-    const teams = projectFoundry(getState(), sync.serverTime);
+  function render(view: FoundryView): void {
+    const teams = view.teams;
     container.replaceChildren(...teams.map((team, index) => {
       const color = palette.teamColors[team.colorSlot % palette.teamColors.length];
       const card = document.createElement('div');

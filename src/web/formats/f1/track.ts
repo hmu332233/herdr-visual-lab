@@ -1,8 +1,8 @@
-import type { SyncMessage } from '../../../shared/protocol.js';
-import type { EntryPresentation } from '../../../shared/presentation.js';
+import type { F1View as SyncMessage } from './view.js';
+import type { EntryPresentation } from '../../presentation.js';
 import { centerline, cumulativeLengths, pointAt, tangentAt, type CircuitPoint } from '../../geometry.js';
 import { contrastText, hexAlpha, palette, teamColor } from '../../palette.js';
-import { extrapolateProgress } from '../../state.js';
+import { extrapolateProgress } from '../../presentation.js';
 
 // Fixed logical scene, aspect-fitted into the canvas (mirrors the SKScene).
 const SCENE_W = 620;

@@ -1,6 +1,5 @@
-import type { SyncMessage } from '../../../shared/protocol.js';
+import type { FoundryView } from './index.js';
 import { contrastText, palette } from '../../palette.js';
-import { projectFoundry, type FoundryState } from './fold.js';
 
 const W = 620;
 const H = 540;
@@ -9,14 +8,13 @@ const FONT = "-apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-ser
 export function createFoundryScene(
   canvas: HTMLCanvasElement,
   _onFocus: (terminalID: string) => void,
-  getState: () => FoundryState,
 ) {
   const ctx = canvas.getContext('2d')!;
-  let sync: SyncMessage | null = null;
+  let view: FoundryView | null = null;
   let dpr = 1, scale = 1, ox = 0, oy = 0;
   resize();
 
-  function setSync(next: SyncMessage, _receivedAtMs: number): void { sync = next; }
+  function commit(next: FoundryView): void { view = next; }
   function resize(): void {
     const parent = canvas.parentElement!;
     const width = Math.max(1, parent.clientWidth), height = Math.max(1, parent.clientHeight);
@@ -25,11 +23,11 @@ export function createFoundryScene(
   }
 
   function frame(nowMs: number): void {
-    if (!sync) return;
+    if (!view) return;
     ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.setTransform(dpr * scale, 0, 0, dpr * scale, dpr * ox, dpr * oy);
     drawSpace(nowMs);
-    const teams = projectFoundry(getState(), sync.serverTime).slice(0, 8);
+    const teams = view.teams.slice(0, 8);
     teams.forEach((team, index) => {
       const col = index % 4, row = Math.floor(index / 4);
       const x = 82 + col * 152, y = 155 + row * 230;
@@ -73,5 +71,5 @@ export function createFoundryScene(
       ctx.fillStyle = palette.liveRed; ctx.font = `900 8px ${FONT}`; ctx.fillText('HAZARD', x, y - 38);
     }
   }
-  return { setSync, resize, frame };
+  return { commit, resize, frame };
 }
