@@ -83,8 +83,8 @@ herdr-f1 [start] [options]
 --no-open         브라우저를 자동으로 열지 않음
 --socket <path>   Herdr Unix socket 경로 지정
 --fixture <name>  Herdr 없이 디자인 fixture 실행
---speed <n>       진행 속도 배율 (기본 5, 실시간은 1). 게임 의미는 그대로이고
-                  시계만 빨라짐 — 레이스 완주/보스 격파가 빨리 옴
+--speed <n>       게임별 기본 속도에 적용할 배율 (기본 1).
+                  F1 기본 속도는 1, Raid/Raid 2 기본 속도는 5
 ```
 
 `start`는 이전 호출 방식과의 호환을 위한 선택적 alias입니다.
@@ -105,15 +105,33 @@ herdr-f1 --fixture grid
 URL 쿼리로 고릅니다 — 서버는 관여하지 않으므로 한 탭은 F1, 다른 탭은 레이드로
 동시에 같은 세션을 볼 수 있습니다.
 
+지원하는 게임은 다음 네 가지입니다.
+
+| 게임 | URL | 표현 방식 |
+| --- | --- | --- |
+| F1 | `/` 또는 `?game=f1` | workspace는 constructor, agent는 서킷을 달리는 차량 |
+| Raid | `?game=raid` | workspace는 guild, agent의 누적 진행은 보스에게 준 damage |
+| Raid 2 | `?game=raid2` | Raid과 규칙·점수 동일, 캐릭터를 전신 히어로 스프라이트(전사·마법사·궁수)로 업그레이드한 비주얼 버전 |
+| Foundry | `?game=foundry` | workspace는 생산 라인, agent는 제한 시간 주문을 조립하는 operator |
+
+예를 들어 기본 포트에서는 다음 주소로 접속합니다.
+
 ```text
-http://localhost:4158/            # 기본 F1
-http://localhost:4158/?game=f1    # F1 (서킷 레이스)
-http://localhost:4158/?game=raid  # 레이드 보스 (누적 진행 = 보스 HP)
+http://localhost:4158/              # 기본 F1
+http://localhost:4158/?game=f1      # F1
+http://localhost:4158/?game=raid    # Raid
+http://localhost:4158/?game=raid2   # Raid 2 (hero characters)
 http://localhost:4158/?game=foundry # Orbital Foundry
 ```
 
 Defense 포맷은 폐기되었습니다. 해당 이름을 포함한 알 수 없는 포맷 값은
 일반 fallback 규칙에 따라 F1을 표시합니다.
+
+Foundry는 60초마다 우주 산업 주문이 바뀌는 협동 공장 게임입니다. `working` agent는
+라인을 가동하고, 동시에 여러 agent가 작업하면 처리량 보너스를 받습니다. `done`은
+완제품 출하, `idle`은 냉각, `blocked`는 라인 고장으로 표현됩니다. 제한 시간 내
+목표 생산량을 채우면 납기 체인이 이어지고 점수 보너스가 커집니다. 이 주문, 점수,
+열과 설비 내구도 역시 실제 생산성 지표가 아닌 관전용 가상 정보입니다.
 
 새 포맷은 `src/web/formats/<name>/` 디렉터리 하나로 추가합니다. 서버와 프로토콜은
 게임 어휘를 전혀 알지 못합니다.
