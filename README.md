@@ -105,14 +105,15 @@ herdr-f1 --fixture grid
 URL 쿼리로 고릅니다 — 서버는 관여하지 않으므로 한 탭은 F1, 다른 탭은 레이드로
 동시에 같은 세션을 볼 수 있습니다.
 
-지원하는 게임은 다음 네 가지입니다.
+지원하는 게임은 다음 다섯 가지입니다.
 
 | 게임 | URL | 표현 방식 |
 | --- | --- | --- |
 | F1 | `/` 또는 `?game=f1` | workspace는 constructor, agent는 서킷을 달리는 차량 |
 | Raid | `?game=raid` | workspace는 guild, agent의 누적 진행은 보스에게 준 damage |
-| Raid 2 | `?game=raid2` | Raid과 규칙·점수 동일, 캐릭터를 전신 히어로 스프라이트(전사·마법사·궁수)로 업그레이드한 비주얼 버전 |
-| Foundry | `?game=foundry` | workspace는 생산 라인, agent는 제한 시간 주문을 조립하는 operator |
+| Raid 2 | `?game=raid2` | Raid과 규칙·점수 동일, 하늘과 땅이 있는 가로 사이드뷰 2D 전장에서 전신 히어로(전사·마법사·궁수)가 우측의 거대 보스를 공격하는 비주얼 버전 |
+| Tiny Spaceport | `?game=spaceport` | workspace는 cargo dock, agent는 우주선에 화물을 나르는 pixel courier |
+| Metro | `?game=metro` | workspace는 노선, agent는 심야 도시를 순환하는 추상 열차 |
 
 예를 들어 기본 포트에서는 다음 주소로 접속합니다.
 
@@ -120,18 +121,26 @@ URL 쿼리로 고릅니다 — 서버는 관여하지 않으므로 한 탭은 F1
 http://localhost:4158/              # 기본 F1
 http://localhost:4158/?game=f1      # F1
 http://localhost:4158/?game=raid    # Raid
-http://localhost:4158/?game=raid2   # Raid 2 (hero characters)
-http://localhost:4158/?game=foundry # Orbital Foundry
+http://localhost:4158/?game=raid2   # Raid 2 (side-view battlefield)
+http://localhost:4158/?game=spaceport # Tiny Spaceport
+http://localhost:4158/?game=metro   # Herdr Metro
 ```
 
 Defense 포맷은 폐기되었습니다. 해당 이름을 포함한 알 수 없는 포맷 값은
 일반 fallback 규칙에 따라 F1을 표시합니다.
 
-Foundry는 60초마다 우주 산업 주문이 바뀌는 협동 공장 게임입니다. `working` agent는
-라인을 가동하고, 동시에 여러 agent가 작업하면 처리량 보너스를 받습니다. `done`은
-완제품 출하, `idle`은 냉각, `blocked`는 라인 고장으로 표현됩니다. 제한 시간 내
-목표 생산량을 채우면 납기 체인이 이어지고 점수 보너스가 커집니다. 이 주문, 점수,
-열과 설비 내구도 역시 실제 생산성 지표가 아닌 관전용 가상 정보입니다.
+Tiny Spaceport는 60초 동안 화물을 싣고 15초 동안 발사를 구경하는 협동 픽셀 게임입니다.
+`working` agent는 귀여운 courier robot이 되어 dock과 중앙 우주선을 오가고, `done`은
+큰 화물 적재, `idle`은 충전, `blocked`는 cargo route jam으로 표현됩니다. 발사량을
+채우면 우주선이 다음 행성으로 출발하고 성공 streak가 이어집니다. 기존
+`?game=foundry` URL도 호환 alias로 같은 화면을 표시합니다. 화물, 점수, 발사 결과는
+실제 생산성 지표가 아닌 관전용 가상 정보입니다.
+
+Metro는 workspace마다 안정적인 색과 경로를 가진 지하철 노선을 만들고, agent를 고유
+번호가 붙은 작은 기하학 열차로 표시합니다. `working` 열차만 운행하고 `idle`은
+차량기지, `done`은 종착역, `blocked`는 현재 선로 또는 정비 칸의 신호 대기로
+표현됩니다. 75초의 심야 운행과 8초의 새벽 연출에서 보이는 운행 횟수와 역 방문은
+관전용 가상 정보이며 실제 진척도나 생산성 지표가 아닙니다.
 
 새 포맷은 `src/web/formats/<name>/` 디렉터리 하나로 추가합니다. 서버와 프로토콜은
 게임 어휘를 전혀 알지 못합니다.
@@ -151,7 +160,7 @@ Foundry는 60초마다 우주 산업 주문이 바뀌는 협동 공장 게임입
 
 Node 서버가 Herdr Unix socket에 연결하고 프로세스 수명 동안 완전한 게임 중립 이벤트
 저널을 소유합니다. 20,000건을 넘어도 기록을 버리지 않으며, 각 브라우저 탭은 전체
-history와 seq가 연속인 delta를 폴드해 F1/Raid/Foundry 상태를 독립적으로 만듭니다.
+history와 seq가 연속인 delta를 폴드해 F1/Raid/Spaceport/Metro 상태를 독립적으로 만듭니다.
 `--speed`는 1초 cap이 적용된 wall time이 중립 `timelineTime`을 늘리는 비율이며 tick
 레코드를 만들지 않습니다. 프로세스를 재시작하면 새 저널이 시작됩니다.
 

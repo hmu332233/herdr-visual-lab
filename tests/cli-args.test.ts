@@ -20,8 +20,8 @@ describe('parseArgs', () => {
     });
   });
 
-  it('defaults to a faster-than-real-time tempo', () => {
-    expect(DEFAULT_SPEED).toBeGreaterThan(1);
+  it('defaults to the per-game tempo multiplier', () => {
+    expect(DEFAULT_SPEED).toBe(1);
     expect(parseArgs(['--speed', '1']).speed).toBe(1);
   });
 

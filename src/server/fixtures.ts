@@ -100,7 +100,7 @@ function grid(session: EventSession): number {
 
 function dense(session: EventSession): number {
   const statuses: AgentStatus[] = ['working', 'working', 'idle', 'done', 'blocked'];
-  const teams: TeamSpec[] = Array.from({ length: 14 }, (_, index) => {
+  const teams: TeamSpec[] = Array.from({ length: 15 }, (_, index) => {
     const id = `ws-${index}`;
     const label = `project-${index}`;
     const agents = Array.from({ length: (index % 3) + 1 }, (_, slot) =>

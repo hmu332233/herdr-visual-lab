@@ -4,7 +4,9 @@ export const DEFAULT_GAME_SPEEDS: Readonly<Record<string, number>> = {
   f1: 1,
   raid: 5,
   raid2: 5,
+  spaceport: 1,
   foundry: 1,
+  metro: 1,
 };
 
 export function applyGameSpeed(message: ServerMessage, game: string): ServerMessage {

@@ -202,3 +202,903 @@ body {
   content: '';
 }
 .onboard-tag[hidden] { display: none; }
+
+/* Raid 2 — a compact side-scrolling RPG screen. The stage owns the action;
+   the narrow party rail is a controller-style roster, not a data table. */
+body[data-game='raid2'] {
+  --canvas: #07152b;
+  --panel: #0a1830;
+  --chrome: #0d1d36;
+  --card: #0d203b;
+  --border: rgba(157, 196, 202, 0.16);
+  --hairline: rgba(157, 196, 202, 0.1);
+  --text-soft: rgba(226, 238, 236, 0.82);
+  --text-muted: rgba(174, 197, 199, 0.52);
+  background: #07152b;
+  image-rendering: pixelated;
+}
+
+body[data-game='raid2'] #app {
+  grid-template-columns: minmax(0, 74fr) minmax(290px, 26fr);
+}
+
+body[data-game='raid2'] #track-column {
+  border-right: 3px solid #172c44;
+  background: #07152b;
+}
+
+body[data-game='raid2'] #track-column > .chrome { display: none; }
+
+body[data-game='raid2'] #track-wrap {
+  background: #07152b;
+  image-rendering: pixelated;
+}
+
+body[data-game='raid2'] #track { image-rendering: pixelated; }
+
+body[data-game='raid2'] #standings-column {
+  background:
+    linear-gradient(rgba(130, 186, 190, 0.025) 1px, transparent 1px) 0 0 / 12px 12px,
+    linear-gradient(90deg, rgba(130, 186, 190, 0.025) 1px, transparent 1px) 0 0 / 12px 12px,
+    #09172c;
+}
+
+body[data-game='raid2'] #standings-column > .chrome {
+  height: 44px;
+  padding: 0 13px;
+  border-bottom: 3px solid #203b53;
+  background:
+    linear-gradient(90deg, rgba(104, 183, 183, 0.08), transparent 60%),
+    #0d1d36;
+}
+
+body[data-game='raid2'] .panel-title {
+  color: #f3f7e7;
+  font: 900 11px ui-monospace, SFMono-Regular, Menlo, monospace;
+  letter-spacing: 2.4px;
+  text-shadow: 2px 2px 0 #061225;
+}
+
+body[data-game='raid2'] #car-count {
+  min-width: 20px;
+  padding: 3px 5px;
+  border: 1px solid #29465d;
+  background: #09172c;
+  color: #a9c2bd;
+  font: 900 8px ui-monospace, SFMono-Regular, Menlo, monospace;
+  text-align: center;
+}
+
+body[data-game='raid2'] #standings-scroll {
+  padding: 13px 12px 16px;
+}
+
+body[data-game='raid2'] #standings-empty {
+  color: #789492;
+  font: 800 9px ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+.raid2-party-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.raid2-party {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid #29465c;
+  border-top: 3px solid var(--party-color);
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--party-color) 9%, transparent), transparent 46%),
+    #0d2039;
+  box-shadow:
+    3px 3px 0 #061225,
+    inset 3px 0 0 color-mix(in srgb, var(--party-color) 34%, transparent);
+}
+
+.raid2-party-header {
+  display: grid;
+  grid-template-columns: 21px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  min-height: 34px;
+  padding: 6px 8px;
+  border-bottom: 1px solid #29465c;
+  background: color-mix(in srgb, var(--party-color) 7%, #0b1a31);
+  color: #dbe8e4;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+.raid2-party-rank {
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  background: var(--party-color);
+  color: #081429;
+  box-shadow: 2px 2px 0 #061225;
+  font-size: 9px;
+  font-weight: 900;
+}
+
+.raid2-party-name {
+  overflow: hidden;
+  color: #edf4e9;
+  font-size: 9.5px;
+  letter-spacing: .55px;
+  text-overflow: ellipsis;
+  text-shadow: 1px 1px 0 #061225;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.raid2-party-damage {
+  padding: 3px 5px;
+  border: 1px solid color-mix(in srgb, var(--party-color) 36%, #29465c);
+  background: #08172b;
+  color: color-mix(in srgb, var(--party-color) 54%, #cfe2db);
+  font-size: 6.5px;
+  font-weight: 800;
+  letter-spacing: .25px;
+  white-space: nowrap;
+}
+
+.raid2-party-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(58px, 1fr));
+  gap: 5px;
+  padding: 7px;
+}
+
+.raid2-member {
+  --role-color: #b9c9c6;
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-width: 0;
+  height: 70px;
+  padding: 2px 2px 15px;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--member-color) 30%, #29465c);
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--member-color) 10%, transparent), transparent 48%),
+    #08172b;
+  color: inherit;
+  cursor: pointer;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  transition: background 100ms linear, border-color 100ms linear;
+}
+
+.raid2-member::before {
+  position: absolute;
+  right: 8px;
+  bottom: 14px;
+  left: 8px;
+  height: 17px;
+  border-bottom: 2px solid var(--member-color);
+  background: linear-gradient(
+    transparent,
+    color-mix(in srgb, var(--member-color) 24%, transparent)
+  );
+  box-shadow: 0 4px 10px color-mix(in srgb, var(--member-color) 30%, transparent);
+  content: '';
+  opacity: .8;
+  pointer-events: none;
+}
+
+.raid2-member.is-warrior { --role-color: #ff8c72; }
+.raid2-member.is-mage { --role-color: #63f4ec; }
+.raid2-member.is-archer { --role-color: #ffd15c; }
+
+.raid2-member:hover {
+  border-color: color-mix(in srgb, var(--member-color) 72%, #fff);
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--member-color) 18%, transparent), transparent 52%),
+    #102944;
+}
+.raid2-member:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: -3px;
+}
+.raid2-member.is-focused {
+  border-color: #fff;
+  box-shadow:
+    inset 0 0 0 1px var(--member-color),
+    0 0 10px color-mix(in srgb, var(--member-color) 52%, transparent);
+}
+.raid2-member.is-reserve { opacity: .62; }
+.raid2-member.is-reserve .raid2-member-portrait {
+  filter: grayscale(.55) brightness(.72);
+}
+.raid2-member.is-blocked { animation: raid2-member-alert 900ms steps(2, end) infinite; }
+
+.raid2-member-portrait {
+  z-index: 1;
+  width: 52px;
+  height: 52px;
+  margin-top: 3px;
+  object-fit: contain;
+  object-position: center bottom;
+  filter: drop-shadow(0 2px 0 #061225);
+  image-rendering: pixelated;
+  pointer-events: none;
+}
+
+.raid2-member-number {
+  position: absolute;
+  z-index: 2;
+  top: 3px;
+  left: 3px;
+  min-width: 16px;
+  padding: 2px 3px;
+  font: 900 7px ui-monospace, SFMono-Regular, Menlo, monospace;
+  text-align: center;
+  box-shadow: 1px 1px 0 #061225;
+}
+
+.raid2-member-role {
+  position: absolute;
+  z-index: 2;
+  top: 3px;
+  right: 3px;
+  min-width: 20px;
+  padding: 2px 3px;
+  border: 1px solid color-mix(in srgb, var(--role-color) 58%, #29465c);
+  background: rgba(5, 16, 31, 0.9);
+  color: var(--role-color);
+  font-size: 6px;
+  font-weight: 900;
+  letter-spacing: .35px;
+  line-height: 1;
+  text-align: center;
+  text-shadow: 1px 1px 0 #061225;
+}
+
+.raid2-member-state {
+  position: absolute;
+  z-index: 2;
+  right: 3px;
+  bottom: 3px;
+  left: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  height: 13px;
+  padding: 0 3px;
+  overflow: hidden;
+  border-top: 1px solid color-mix(in srgb, var(--raid2-state-color) 38%, #29465c);
+  background: rgba(5, 16, 31, 0.92);
+}
+
+.raid2-member-state-dot {
+  width: 5px;
+  height: 5px;
+  flex: none;
+  background: var(--raid2-state-color);
+  box-shadow: 0 0 5px color-mix(in srgb, var(--raid2-state-color) 72%, transparent);
+}
+
+.raid2-member-state-label {
+  overflow: hidden;
+  color: #dce8e3;
+  font-size: 6px;
+  font-weight: 900;
+  letter-spacing: .45px;
+  line-height: 1;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@keyframes raid2-member-alert {
+  50% {
+    border-color: #ff674b;
+    box-shadow: inset 0 0 0 1px rgba(255, 103, 75, 0.65);
+  }
+}
+
+@media (max-width: 900px) {
+  body[data-game='raid2'] #app {
+    grid-template-columns: minmax(0, 66fr) minmax(260px, 34fr);
+  }
+  .raid2-party-grid {
+    grid-template-columns: repeat(auto-fit, minmax(50px, 1fr));
+    gap: 4px;
+    padding: 6px;
+  }
+}
+
+@media (max-height: 720px) {
+  body[data-game='raid2'] #standings-scroll { padding: 8px; }
+  .raid2-party-list { gap: 7px; }
+  .raid2-party-header {
+    min-height: 28px;
+    padding: 4px 6px;
+  }
+  .raid2-party-grid {
+    gap: 4px;
+    padding: 5px;
+  }
+  .raid2-member { height: 62px; }
+  .raid2-member-portrait {
+    width: 44px;
+    height: 44px;
+  }
+}
+
+/* Tiny Spaceport is a crisp pixel-art spectator board. `foundry` remains a
+   compatibility URL while `spaceport` is the public format name. */
+body:is([data-game='foundry'], [data-game='spaceport']) {
+  --canvas: #06132f;
+  --panel: #0b1834;
+  --chrome: #102448;
+  --card: #0f2040;
+  --card-header: rgba(112, 215, 255, 0.08);
+  --border: rgba(112, 215, 255, 0.22);
+  --hairline: rgba(112, 215, 255, 0.12);
+  --text-soft: rgba(232, 248, 255, 0.82);
+  --text-muted: rgba(159, 205, 226, 0.62);
+  background: #06132f;
+  image-rendering: pixelated;
+}
+
+body:is([data-game='foundry'], [data-game='spaceport']) #app {
+  grid-template-columns: minmax(0, 72fr) minmax(300px, 28fr);
+}
+body:is([data-game='foundry'], [data-game='spaceport']) #track-column {
+  border-right: 3px solid #244d72;
+  background: #06132f;
+  box-shadow: 8px 0 24px rgba(0, 0, 0, 0.36);
+}
+body:is([data-game='foundry'], [data-game='spaceport']) #track-column > .chrome { display: none; }
+body:is([data-game='foundry'], [data-game='spaceport']) #track-wrap {
+  background: #06132f;
+  image-rendering: pixelated;
+}
+body:is([data-game='foundry'], [data-game='spaceport']) #track {
+  image-rendering: pixelated;
+}
+body:is([data-game='foundry'], [data-game='spaceport']) #standings-column {
+  background:
+    linear-gradient(rgba(112, 215, 255, 0.035) 1px, transparent 1px) 0 0 / 16px 16px,
+    linear-gradient(90deg, rgba(112, 215, 255, 0.035) 1px, transparent 1px) 0 0 / 16px 16px,
+    #0a1732;
+}
+body:is([data-game='foundry'], [data-game='spaceport']) .chrome {
+  height: 44px;
+  border-bottom: 3px solid #244d72;
+  background: #102448;
+  color: #e8f8ff;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+body:is([data-game='foundry'], [data-game='spaceport']) .panel-title {
+  color: #fff5d9;
+  font-size: 11px;
+  letter-spacing: 2px;
+}
+body:is([data-game='foundry'], [data-game='spaceport']) #standings-scroll {
+  padding: 10px;
+}
+body:is([data-game='foundry'], [data-game='spaceport']) #standings-empty {
+  padding: 54px 24px;
+  color: #78b7d2;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  line-height: 1.8;
+}
+
+.spaceport-standings {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+.mission-card {
+  position: relative;
+  overflow: hidden;
+  padding: 13px;
+  border: 2px solid #315a7b;
+  border-top: 4px solid var(--mission-color);
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--mission-color) 10%, transparent), transparent 52%),
+    #102345;
+  box-shadow: 4px 4px 0 #061127;
+}
+.mission-card::after {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  width: 10px;
+  height: 10px;
+  background: var(--mission-color);
+  box-shadow: 0 0 12px var(--mission-color);
+  content: '';
+}
+.mission-eyebrow {
+  display: block;
+  color: #79bdd6;
+  font-size: 7px;
+  font-weight: 900;
+  letter-spacing: 1.2px;
+}
+.mission-destination {
+  display: block;
+  margin-top: 5px;
+  color: #fff5d9;
+  font-size: 17px;
+  letter-spacing: 1px;
+}
+.mission-cargo {
+  display: block;
+  margin-top: 3px;
+  color: var(--mission-color);
+  font-size: 7px;
+  font-weight: 800;
+  letter-spacing: .7px;
+}
+.mission-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  margin: 12px -13px 0;
+  border-top: 1px solid #274967;
+  border-bottom: 1px solid #274967;
+}
+.mission-stats > div {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 8px 4px;
+  border-right: 1px solid #274967;
+}
+.mission-stats > div:last-child { border-right: 0; }
+.mission-stats strong { color: #f4fbff; font-size: 13px; }
+.mission-stats span { color: #699bb5; font-size: 6px; font-weight: 900; letter-spacing: 1px; }
+.mission-progress { margin-top: 10px; }
+.mission-progress > div:first-child {
+  display: flex;
+  justify-content: space-between;
+  color: #9fd9eb;
+  font-size: 7px;
+  font-weight: 900;
+  letter-spacing: .8px;
+}
+.mission-progress > div:last-child,
+.dock-meter {
+  height: 6px;
+  margin-top: 6px;
+  overflow: hidden;
+  background: #061128;
+}
+.mission-progress > div:last-child span,
+.dock-meter span {
+  display: block;
+  height: 100%;
+  background: var(--mission-color);
+  box-shadow: 0 0 10px color-mix(in srgb, var(--mission-color) 70%, transparent);
+}
+
+.dock-card {
+  overflow: hidden;
+  border: 2px solid #294c6c;
+  border-left: 4px solid var(--team-color);
+  background: #0e1f3d;
+  box-shadow: 3px 3px 0 #061128;
+}
+.dock-header {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  min-height: 42px;
+  padding: 7px 9px;
+}
+.dock-badge {
+  display: grid;
+  place-items: center;
+  width: 25px;
+  height: 25px;
+  border: 2px solid rgba(255,255,255,.55);
+  font-size: 8px;
+  font-weight: 900;
+}
+.dock-title { display: flex; min-width: 0; flex-direction: column; gap: 3px; }
+.dock-title strong {
+  overflow: hidden;
+  color: #f4fbff;
+  font-size: 10px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.dock-title span { color: #73a6bd; font-size: 6.5px; letter-spacing: .5px; }
+.dock-activity {
+  color: #72e6a6;
+  font-size: 6.5px;
+  font-weight: 900;
+  letter-spacing: .6px;
+}
+.dock-activity.has-hazard {
+  color: #ff7181;
+  animation: spaceport-alarm 800ms steps(2, end) infinite;
+}
+.dock-meter { height: 3px; margin: 0; }
+.courier-list { display: flex; flex-direction: column; border-top: 1px solid var(--hairline); }
+.courier-row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  min-height: 39px;
+  padding: 5px 9px;
+  border: 0;
+  border-bottom: 1px solid var(--hairline);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.courier-row:last-child { border-bottom: 0; }
+.courier-row:hover { background: rgba(112, 215, 255, 0.06); }
+.courier-row:focus-visible { outline: 1px solid var(--team-color); outline-offset: -2px; }
+.courier-row.is-targeted { background: color-mix(in srgb, var(--team-color) 11%, transparent); }
+.courier-portrait {
+  display: grid;
+  place-items: center;
+  width: 27px;
+  height: 27px;
+  border: 3px solid #eaf7f2;
+  background:
+    linear-gradient(#17304a 0 42%, var(--courier-color) 42% 100%);
+  color: #72f0e4;
+  font-size: 7px;
+  font-weight: 900;
+  box-shadow: 2px 2px 0 #061128;
+}
+.courier-identity { display: flex; min-width: 0; flex-direction: column; gap: 2px; }
+.courier-identity strong {
+  overflow: hidden;
+  color: #eef9ff;
+  font-size: 8.5px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.courier-identity span { color: #6f9bb1; font-size: 6px; letter-spacing: .5px; }
+.courier-state {
+  padding: 3px 5px;
+  font-size: 6px;
+  font-weight: 900;
+  letter-spacing: .4px;
+  white-space: nowrap;
+}
+
+@keyframes spaceport-alarm {
+  50% { color: #fff; background: rgba(255, 64, 85, .35); }
+}
+
+@media (max-width: 900px) {
+  body:is([data-game='foundry'], [data-game='spaceport']) #app {
+    grid-template-columns: minmax(0, 60fr) minmax(280px, 40fr);
+  }
+  body:is([data-game='foundry'], [data-game='spaceport']) #gp-text { display: none; }
+}
+
+/* Herdr Metro — a quiet, diagrammatic night network. The map and rolling
+   stock are code-drawn vectors; the panel keeps the transit-control language. */
+body[data-game='metro'] {
+  --canvas: #071521;
+  --panel: #08121c;
+  --chrome: #0a1722;
+  --card: #0d1c29;
+  --card-header: rgba(214, 235, 239, .035);
+  --border: rgba(183, 214, 225, .14);
+  --hairline: rgba(183, 214, 225, .09);
+  --row-hover: rgba(214, 235, 239, .05);
+  --text-soft: rgba(239, 244, 236, .8);
+  --text-muted: rgba(153, 178, 185, .58);
+  --live-red: #35b77d;
+  --status-blocked: #ff4d5e;
+  background: #071521;
+}
+
+body[data-game='metro'] #app {
+  grid-template-columns: minmax(0, 72fr) minmax(300px, 28fr);
+}
+
+body[data-game='metro'] #track-column {
+  border-right-color: rgba(183, 214, 225, .16);
+  background: #071521;
+}
+
+body[data-game='metro'] #track-column > .chrome {
+  order: 2;
+  height: 42px;
+  padding: 0 16px;
+  border-top: 1px solid var(--border);
+  border-bottom: 0;
+  background:
+    linear-gradient(90deg, rgba(99, 214, 155, .055), transparent 38%),
+    #091722;
+}
+
+body[data-game='metro'] #track-wrap { order: 1; background: #071521; }
+
+body[data-game='metro'] #standings-column {
+  background:
+    linear-gradient(rgba(183, 214, 225, .018) 1px, transparent 1px) 0 0 / 24px 24px,
+    #08121c;
+}
+
+body[data-game='metro'] #standings-column > .chrome {
+  height: 42px;
+  padding: 0 13px;
+  background: #0a1722;
+}
+
+body[data-game='metro'] .panel-title {
+  color: #eff4ec;
+  font: 750 11px ui-monospace, SFMono-Regular, Menlo, monospace;
+  letter-spacing: 2.2px;
+}
+
+body[data-game='metro'] #live-pill {
+  border: 1px solid rgba(99, 214, 155, .34);
+  border-radius: 999px;
+  background: rgba(99, 214, 155, .08);
+  color: #9ee8c4;
+}
+
+body[data-game='metro'] #live-pill .dot {
+  background: currentColor;
+  box-shadow: 0 0 7px currentColor;
+}
+
+body[data-game='metro'] #phase-text,
+body[data-game='metro'] #lap-text,
+body[data-game='metro'] #gp-text,
+body[data-game='metro'] #connection-text,
+body[data-game='metro'] #car-count {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+body[data-game='metro'] #phase-text { letter-spacing: 1.2px; }
+body[data-game='metro'] #lap-text { color: #eff4ec; }
+body[data-game='metro'] #gp-text { color: #78909c; }
+body[data-game='metro'] #connection-text { color: #63d69b; }
+body[data-game='metro'] #car-count {
+  color: #9db2b8;
+  font-size: 8px;
+  font-weight: 750;
+  letter-spacing: .8px;
+}
+
+body[data-game='metro'] #standings-scroll { padding: 10px; }
+body[data-game='metro'] #standings-empty {
+  padding: 48px 16px;
+  color: #607984;
+  font: 700 9px/1.7 ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+.metro-control {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+.metro-line-card {
+  --line-color: #63d69b;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid #183040;
+  border-left: 4px solid var(--line-color);
+  border-radius: 7px;
+  background:
+    linear-gradient(100deg, color-mix(in srgb, var(--line-color) 7%, transparent), transparent 42%),
+    #0d1c29;
+}
+
+.metro-line-card.has-hold {
+  border-color: color-mix(in srgb, #ff4d5e 52%, #183040);
+  border-left-color: var(--line-color);
+}
+
+.metro-line-header {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 9px;
+  min-height: 43px;
+  padding: 7px 9px;
+  border-bottom: 1px solid var(--hairline);
+  background: var(--card-header);
+}
+
+.metro-line-symbol {
+  display: grid;
+  place-items: center;
+  width: 27px;
+  height: 27px;
+  border: 3px solid var(--line-color);
+  border-radius: 50%;
+  background: #091722;
+  color: #eff4ec;
+  font-size: 8px;
+  font-weight: 900;
+}
+
+.metro-line-copy {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.metro-line-copy strong {
+  overflow: hidden;
+  color: #eff4ec;
+  font-size: 10px;
+  letter-spacing: .3px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.metro-line-copy span {
+  color: #78909c;
+  font-size: 6.5px;
+  font-weight: 750;
+  letter-spacing: .65px;
+}
+
+.metro-line-health {
+  padding: 4px 6px;
+  border: 1px solid rgba(99, 214, 155, .22);
+  border-radius: 999px;
+  color: #83dcb2;
+  font-size: 6.5px;
+  font-weight: 900;
+  letter-spacing: .55px;
+  white-space: nowrap;
+}
+
+.metro-line-health.has-hold {
+  border-color: rgba(255, 77, 94, .38);
+  background: rgba(255, 77, 94, .08);
+  color: #ff7a87;
+}
+
+.metro-train-list { display: flex; flex-direction: column; }
+
+.metro-train-row {
+  --line-color: #63d69b;
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 41px;
+  padding: 5px 9px;
+  border: 0;
+  border-bottom: 1px solid var(--hairline);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.metro-train-row:last-child { border-bottom: 0; }
+.metro-train-row:hover { background: var(--row-hover); }
+.metro-train-row:disabled {
+  cursor: default;
+  opacity: .72;
+}
+.metro-train-row:disabled:hover { background: transparent; }
+.metro-train-row:focus-visible {
+  outline: 1px solid #eff4ec;
+  outline-offset: -3px;
+}
+
+.metro-train-row.is-focused {
+  background: color-mix(in srgb, var(--line-color) 10%, transparent);
+  box-shadow: inset 0 0 0 1px rgba(239, 244, 236, .54);
+}
+
+.metro-train-row.is-blocked {
+  background:
+    linear-gradient(90deg, rgba(255, 77, 94, .13), transparent 42%),
+    transparent;
+}
+
+.metro-train-token {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 18px;
+  border: 2px solid #06111a;
+  border-radius: 5px;
+  background: var(--line-color);
+  color: var(--train-ink, #071521);
+  font-size: 8px;
+  font-weight: 950;
+  letter-spacing: -.4px;
+}
+
+.metro-train-token::after {
+  position: absolute;
+  top: 5px;
+  right: 3px;
+  width: 3px;
+  height: 6px;
+  border-radius: 2px;
+  background: #fff9dc;
+  content: '';
+}
+
+.metro-train-copy {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.metro-train-copy strong {
+  overflow: hidden;
+  color: #edf3ed;
+  font-size: 8.5px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.metro-train-copy span {
+  overflow: hidden;
+  color: #6f8791;
+  font-size: 6px;
+  font-weight: 750;
+  letter-spacing: .65px;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.metro-train-state {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: #9ab0b7;
+  font-size: 6.5px;
+  font-weight: 900;
+  letter-spacing: .55px;
+  white-space: nowrap;
+}
+
+.metro-train-state::before {
+  width: 5px;
+  height: 5px;
+  border: 1px solid currentColor;
+  border-radius: 50%;
+  background: currentColor;
+  box-shadow: 0 0 6px currentColor;
+  content: '';
+}
+
+.metro-train-state.is-service { color: #63d69b; }
+.metro-train-state.is-depot { color: #78909c; }
+.metro-train-state.is-terminated { color: #ead591; }
+.metro-train-state.is-hold { color: #ff6574; }
+
+@media (max-width: 920px) {
+  body[data-game='metro'] #app {
+    grid-template-columns: minmax(0, 62fr) minmax(280px, 38fr);
+  }
+  body[data-game='metro'] #gp-text { display: none; }
+}
+
+@media (max-height: 680px) {
+  body[data-game='metro'] #standings-scroll { padding: 7px; }
+  .metro-control { gap: 6px; }
+  .metro-line-header { min-height: 36px; padding: 5px 7px; }
+  .metro-train-row { min-height: 34px; padding: 4px 7px; }
+}

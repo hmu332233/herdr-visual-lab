@@ -1,6 +1,7 @@
 import { stableHash } from '../../../shared/deterministic.js';
 export const RaidRules = { bossHealth: 58, baseDamageDuration: 18, baseDamageRate: 1/18,
-  attackRateMin: .75, attackRateMax: 1.25, victoryOrbitFactor: .25,
+  attackRateMin: .75, attackRateMax: 1.25, doneAttackFactor: .25, basicHitDamage: 1,
+  victoryOrbitFactor: .25,
   bossDownDuration: 8, newcomerDeficit: .15, respawnDuration: 4,
   paletteSize: 12, maximumRaiderNumber: 99 } as const;
 const MASK = 0xffffffffffffffffn;

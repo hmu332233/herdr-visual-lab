@@ -16,8 +16,8 @@ export interface CliOptions {
   speed: number;
 }
 
-/** Default tempo. Override with `--speed` (use `--speed 1` for real time). */
-export const DEFAULT_SPEED = 5;
+/** Server-wide multiplier applied on top of each game's default tempo. */
+export const DEFAULT_SPEED = 1;
 
 const USAGE = `Usage: herdr-f1 [start] [--port <n>] [--no-open] [--fixture <${FIXTURE_NAMES.join('|')}>] [--socket <path>] [--speed <n>]`;
 class UsageError extends Error {}

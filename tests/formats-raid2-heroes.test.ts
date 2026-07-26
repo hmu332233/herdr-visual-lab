@@ -1,69 +1,35 @@
 import { describe, expect, it } from 'vitest';
-import { HERO_RAIDER_STYLE } from '../src/web/formats/raid2/heroes.js';
+import {
+  COMBAT_ANIMATION_ROWS,
+  HERO_HALF_WIDTH,
+  HERO_HEIGHT,
+  HERO_SHEET_URLS,
+  HERO_SIZE,
+  HERO_URLS,
+  SPRITE_SHEET_COLUMNS,
+  SPRITE_SHEET_ROWS,
+} from '../src/web/formats/raid2/heroes.js';
 import { RAIDER_CLASSES } from '../src/web/formats/raid/roles.js';
-import type { RaiderSprite } from '../src/web/formats/raid/scene.js';
-import { fakeCanvasContext } from './helpers/fake-canvas.js';
 
-function sprite(overrides: Partial<RaiderSprite> = {}): RaiderSprite {
-  return {
-    kind: 'warrior',
-    color: '#E10600',
-    aim: Math.PI / 4,
-    attack: 0.6,
-    nowMs: 700,
-    fighting: true,
-    crowned: false,
-    unitNumber: 7,
-    patternSlot: null,
-    ...overrides,
-  };
-}
-
-describe('hero raider style', () => {
-  it('draws every class and state with balanced canvas save/restore', () => {
-    for (const kind of RAIDER_CLASSES)
-      for (const fighting of [true, false])
-        for (const crowned of [false, true])
-          for (const patternSlot of [null, 1]) {
-            const ctx = fakeCanvasContext();
-            HERO_RAIDER_STYLE.drawCharacter(ctx, sprite({ kind, fighting, crowned, patternSlot }));
-            const saves = ctx.calls.filter(call => call.name === 'save').length;
-            const restores = ctx.calls.filter(call => call.name === 'restore').length;
-            expect(saves).toBe(restores);
-            expect(ctx.calls.length).toBeGreaterThan(0);
-          }
+describe('raid2 Pixi hero assets', () => {
+  it('provides one shared texture URL for every raider class', () => {
+    expect(Object.keys(HERO_URLS).sort()).toEqual([...RAIDER_CLASSES].sort());
+    expect(new Set(Object.values(HERO_URLS)).size).toBe(RAIDER_CLASSES.length);
+    for (const url of Object.values(HERO_URLS)) expect(url).toMatch(/\.png$/);
   });
 
-  it('renders deterministically for identical sprites', () => {
-    const first = fakeCanvasContext();
-    const second = fakeCanvasContext();
-    HERO_RAIDER_STYLE.drawCharacter(first, sprite());
-    HERO_RAIDER_STYLE.drawCharacter(second, sprite());
-    expect(first.calls).toEqual(second.calls);
+  it('provides one versioned 4×4 animation sheet for every class', () => {
+    expect(Object.keys(HERO_SHEET_URLS).sort()).toEqual([...RAIDER_CLASSES].sort());
+    expect(new Set(Object.values(HERO_SHEET_URLS)).size).toBe(RAIDER_CLASSES.length);
+    for (const url of Object.values(HERO_SHEET_URLS)) {
+      expect(url).toMatch(/-sheet-v1\.png$/);
+    }
+    expect([SPRITE_SHEET_COLUMNS, SPRITE_SHEET_ROWS]).toEqual([4, 4]);
+    expect(COMBAT_ANIMATION_ROWS).toEqual({ idle: 0, attack: 1, hit: 2 });
   });
 
-  it('gives each class a visibly distinct body', () => {
-    const logs = RAIDER_CLASSES.map(kind => {
-      const ctx = fakeCanvasContext();
-      HERO_RAIDER_STYLE.drawCharacter(ctx, sprite({ kind }));
-      return JSON.stringify(ctx.calls);
-    });
-    expect(new Set(logs).size).toBe(RAIDER_CLASSES.length);
-  });
-
-  it('animates the weapon with the attack envelope', () => {
-    const relaxed = fakeCanvasContext();
-    const striking = fakeCanvasContext();
-    HERO_RAIDER_STYLE.drawCharacter(relaxed, sprite({ attack: 0 }));
-    HERO_RAIDER_STYLE.drawCharacter(striking, sprite({ attack: 1 }));
-    expect(relaxed.calls).not.toEqual(striking.calls);
-  });
-
-  it('swaps class headgear for a crown when crowned', () => {
-    const plain = fakeCanvasContext();
-    const crowned = fakeCanvasContext();
-    HERO_RAIDER_STYLE.drawCharacter(plain, sprite({ crowned: false }));
-    HERO_RAIDER_STYLE.drawCharacter(crowned, sprite({ crowned: true }));
-    expect(plain.calls).not.toEqual(crowned.calls);
+  it('keeps a stable feet-anchored scene footprint', () => {
+    expect(HERO_SIZE).toBeGreaterThanOrEqual(HERO_HEIGHT);
+    expect(HERO_HALF_WIDTH * 2).toBeLessThanOrEqual(HERO_SIZE);
   });
 });

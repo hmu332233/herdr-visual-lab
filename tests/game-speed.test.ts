@@ -34,4 +34,16 @@ describe('game speed', () => {
     expect(DEFAULT_GAME_SPEEDS.raid2).toBe(5);
     expect(applyGameSpeed(message, 'raid2')).toEqual(applyGameSpeed(message, 'raid'));
   });
+
+  it('runs Tiny Spaceport in real time and preserves the Foundry alias', () => {
+    expect(DEFAULT_GAME_SPEEDS.spaceport).toBe(1);
+    expect(DEFAULT_GAME_SPEEDS.foundry).toBe(1);
+    expect(applyGameSpeed(message, 'spaceport')).toBe(message);
+    expect(applyGameSpeed(message, 'foundry')).toBe(message);
+  });
+
+  it('runs Metro on the neutral real-time journal', () => {
+    expect(DEFAULT_GAME_SPEEDS.metro).toBe(1);
+    expect(applyGameSpeed(message, 'metro')).toBe(message);
+  });
 });
