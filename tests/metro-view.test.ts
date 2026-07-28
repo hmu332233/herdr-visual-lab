@@ -30,6 +30,8 @@ function unit(
       id,
       teamID,
       tabLabel: id,
+      tabID: `tab-${id}`,
+      terminalTitle: null,
       agentKind: 'codex',
       status,
       isFocused,

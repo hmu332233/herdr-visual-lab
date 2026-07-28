@@ -7,13 +7,15 @@ describe('game selection', () => {
   });
 
   it('keeps all existing public and compatibility formats', () => {
-    expect(resolveGameName('')).toBe('f1');
+    expect(resolveGameName('')).toBe('galaxy');
+    expect(resolveGameName('?game=kanban')).toBe('kanban');
     expect(resolveGameName('?game=raid2')).toBe('raid2');
+    expect(resolveGameName('?game=galaxy')).toBe('galaxy');
     expect(resolveGameName('?game=spaceport')).toBe('spaceport');
     expect(resolveGameName('?game=foundry')).toBe('foundry');
   });
 
-  it('falls back to F1 for unknown formats', () => {
-    expect(resolveGameName('?game=defense')).toBe('f1');
+  it('falls back to Galaxy for unknown formats', () => {
+    expect(resolveGameName('?game=defense')).toBe('galaxy');
   });
 });

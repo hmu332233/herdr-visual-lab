@@ -10,6 +10,8 @@ export interface EventTeam {
 export interface EventUnitProfile {
   teamID: string;
   tabLabel: string;
+  tabID: string;
+  terminalTitle: string | null;
   agentKind: string;
   isFocused: boolean;
 }
@@ -21,6 +23,19 @@ export interface EventUnit extends EventUnitProfile {
   stableOrder: number;
 }
 
+export interface TopologyTab {
+  id: string;
+  label: string;
+}
+
+/** Full session hierarchy including agent-less workspaces and tabs.
+ *  Orthogonal to team/unit events, which stay agent-only. */
+export interface TopologyTeam {
+  id: string;
+  label: string;
+  tabs: TopologyTab[];
+}
+
 export type GameEventBody =
   | { kind: 'connection-changed'; connection: ConnectionState }
   | { kind: 'team-joined'; team: EventTeam }
@@ -30,6 +45,7 @@ export type GameEventBody =
   | { kind: 'unit-departed'; unitID: string }
   | { kind: 'status-changed'; unitID: string; from: AgentStatus; to: AgentStatus }
   | { kind: 'unit-session-restarted'; unitID: string }
+  | { kind: 'topology-changed'; teams: TopologyTeam[] }
   | { kind: 'snapshot-applied' };
 
 /** `at` is cumulative accepted logical session time, not civil time. */

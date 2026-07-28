@@ -4,6 +4,7 @@ import { createF1Format } from './formats/f1/index.js';
 import { createRaidFormat } from './formats/raid/index.js';
 import { createFoundryFormat } from './formats/foundry/index.js';
 import { createMetroFormat } from './formats/metro/index.js';
+import { createKanbanFormat } from './formats/kanban/index.js';
 import type { ServerMessage } from '../shared/protocol.js';
 import { createEventSource } from './event-source.js';
 import { applyGameSpeed } from './game-speed.js';
@@ -11,6 +12,7 @@ import { resolveGameName } from './game-selection.js';
 
 async function bootstrap(): Promise<void> {
   const factories: Record<string, () => GameFormat> = {
+    kanban: createKanbanFormat,
     f1: createF1Format,
     raid: createRaidFormat,
     spaceport: createFoundryFormat,
@@ -18,9 +20,12 @@ async function bootstrap(): Promise<void> {
     metro: createMetroFormat,
   };
   const activeGame = resolveGameName(location.search);
+  // raid2 and galaxy load lazily: raid2 for its art assets, galaxy for pixi.
   const format = activeGame === 'raid2'
     ? (await import('./formats/raid2/index.js')).createRaid2Format()
-    : factories[activeGame]();
+    : activeGame === 'galaxy'
+      ? (await import('./formats/galaxy/index.js')).createGalaxyFormat()
+      : factories[activeGame]();
 
   document.body.dataset.game = activeGame;
   let socket: WebSocket | null = null;

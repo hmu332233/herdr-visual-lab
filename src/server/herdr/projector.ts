@@ -1,5 +1,5 @@
 import type { AgentStatus } from '../../shared/presentation.js';
-import type { SourceAgent, SourceSnapshot, SourceTeam } from './types.js';
+import type { SourceAgent, SourceSnapshot, SourceTab, SourceTeam } from './types.js';
 
 // herdr 0.7.5 ships protocol 17; the snapshot shape (workspaces/tabs/panes/
 // agents with object agent_session) is unchanged from 16, so both are accepted.
@@ -43,8 +43,16 @@ export function projectSnapshot(snapshot: unknown): SourceSnapshot {
   }
 
   const tabs = new Map<string, { label?: string | null; title?: string | null; name?: string | null }>();
-  for (const tab of (Array.isArray(raw.tabs) ? raw.tabs : []) as Array<{ tab_id?: string }>) {
-    if (typeof tab?.tab_id === 'string') tabs.set(tab.tab_id, tab as never);
+  const tabsByWorkspace = new Map<string, SourceTab[]>();
+  for (const tab of (Array.isArray(raw.tabs) ? raw.tabs : []) as Array<{
+    tab_id?: string; workspace_id?: string; label?: string | null; title?: string | null; name?: string | null;
+  }>) {
+    if (typeof tab?.tab_id !== 'string') continue;
+    tabs.set(tab.tab_id, tab as never);
+    if (typeof tab.workspace_id !== 'string') continue;
+    const list = tabsByWorkspace.get(tab.workspace_id) ?? [];
+    list.push({ id: tab.tab_id, label: firstVisible(tab.label, tab.title, tab.name) ?? tab.tab_id });
+    tabsByWorkspace.set(tab.workspace_id, list);
   }
 
   const focusedPaneID = typeof raw.focused_pane_id === 'string' ? raw.focused_pane_id : null;
@@ -54,11 +62,18 @@ export function projectSnapshot(snapshot: unknown): SourceSnapshot {
     if (typeof status !== 'string' || !STATUSES.has(status)) continue;
     const workspaceID = String(agent.workspace_id ?? '');
     const paneID = String(agent.pane_id ?? '');
+    const tabID = firstVisible(agent.tab_id, paneID, agent.terminal_id) ?? 'unknown-tab';
     const entry: SourceAgent = {
       terminalID: String(agent.terminal_id ?? ''),
       paneID,
       workspaceID,
-      tabLabel: tabLabel(agent, tabs),
+      tabLabel: tabLabel(agent, tabs, tabID),
+      tabID,
+      terminalTitle: firstVisible(
+        agent.title,
+        agent.terminal_title_stripped,
+        agent.terminal_title,
+      ),
       agentKind:
         firstVisible(agent.display_agent, agent.agent, agent.name) ?? 'Agent',
       agentSessionReference: sessionReference(agent),
@@ -74,9 +89,17 @@ export function projectSnapshot(snapshot: unknown): SourceSnapshot {
   for (const workspace of raw.workspaces as Array<{ workspace_id?: string; label?: string }>) {
     const id = workspace?.workspace_id;
     if (typeof id !== 'string') continue;
-    const agents = agentsByWorkspace.get(id);
-    if (!agents || agents.length === 0) continue;
-    teams.push({ id, label: workspace.label ?? id, agents });
+    const agents = agentsByWorkspace.get(id) ?? [];
+    // Authoritative tab list first; agents can sit in a tab the tabs array
+    // does not know (pane/terminal fallback IDs), so append those.
+    const workspaceTabs = [...(tabsByWorkspace.get(id) ?? [])];
+    const known = new Set(workspaceTabs.map(tab => tab.id));
+    for (const agent of agents) {
+      if (known.has(agent.tabID)) continue;
+      known.add(agent.tabID);
+      workspaceTabs.push({ id: agent.tabID, label: agent.tabLabel });
+    }
+    teams.push({ id, label: workspace.label ?? id, tabs: workspaceTabs, agents });
   }
   return { teams };
 }
@@ -84,11 +107,12 @@ export function projectSnapshot(snapshot: unknown): SourceSnapshot {
 function tabLabel(
   agent: Record<string, unknown>,
   tabs: Map<string, { label?: string | null; title?: string | null; name?: string | null }>,
+  resolvedTabID: string,
 ): string {
   const tabID = typeof agent.tab_id === 'string' ? agent.tab_id : null;
   const tab = tabID === null ? undefined : tabs.get(tabID);
-  if (!tab) return tabID ?? String(agent.pane_id ?? '');
-  return firstVisible(tab.label, tab.title, tab.name) ?? (tabID as string);
+  if (!tab) return resolvedTabID;
+  return firstVisible(tab.label, tab.title, tab.name) ?? resolvedTabID;
 }
 
 /** Opaque identity token used only for NEW STINT detection; never shown. */

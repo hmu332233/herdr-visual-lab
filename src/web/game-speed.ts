@@ -1,6 +1,7 @@
 import type { ServerMessage } from '../shared/protocol.js';
 
 export const DEFAULT_GAME_SPEEDS: Readonly<Record<string, number>> = {
+  kanban: 1,
   f1: 1,
   raid: 5,
   raid2: 5,

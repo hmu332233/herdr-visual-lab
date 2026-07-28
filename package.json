@@ -3,9 +3,17 @@
   "version": "0.1.0",
   "type": "module",
   "description": "Herdr F1 — watch your coding agents race in the browser",
-  "bin": { "herdr-f1": "bin/herdr-f1.js" },
-  "files": ["bin", "dist", "README.md"],
-  "engines": { "node": ">=20" },
+  "bin": {
+    "herdr-f1": "bin/herdr-f1.js"
+  },
+  "files": [
+    "bin",
+    "dist",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "build": "vite build && tsc -p tsconfig.server.json",
     "start": "node bin/herdr-f1.js",
@@ -15,7 +23,10 @@
     "test": "vitest run",
     "typecheck": "tsc --noEmit"
   },
-  "dependencies": { "pixi.js": "^8.19.0", "ws": "^8.18.0" },
+  "dependencies": {
+    "pixi.js": "^8.19.0",
+    "ws": "^8.18.0"
+  },
   "devDependencies": {
     "@types/node": "^22.10.0",
     "@types/ws": "^8.5.13",

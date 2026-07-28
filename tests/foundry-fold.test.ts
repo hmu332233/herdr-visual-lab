@@ -23,6 +23,8 @@ const unit: GameEventBody = {
     id: 'u',
     teamID: 'a',
     tabLabel: 'core',
+    tabID: 'tab-u',
+    terminalTitle: null,
     agentKind: 'codex',
     status: 'working',
     isFocused: false,
@@ -146,6 +148,8 @@ describe('Tiny Spaceport event fold', () => {
           profile: {
             teamID: 'a',
             tabLabel: 'spaceport-ui',
+            tabID: 'tab-u',
+            terminalTitle: null,
             agentKind: 'codex',
             isFocused: true,
           },

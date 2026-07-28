@@ -11,6 +11,10 @@ const message: SyncMessage = {
 };
 
 describe('game speed', () => {
+  it('runs Kanban in real time', () => {
+    expect(DEFAULT_GAME_SPEEDS.kanban).toBe(1);
+    expect(applyGameSpeed(message, 'kanban')).toBe(message);
+  });
   it('uses real time for F1', () => {
     expect(DEFAULT_GAME_SPEEDS.f1).toBe(1);
     expect(applyGameSpeed(message, 'f1')).toBe(message);

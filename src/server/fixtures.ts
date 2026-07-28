@@ -28,12 +28,18 @@ function agent(
 ): SourceAgent {
   return {
     terminalID: id, paneID: `pane-${id}`, workspaceID: workspace,
-    tabLabel: tab, agentKind: kind, agentSessionReference: null, isFocused: focused, status,
+    tabLabel: tab, tabID: `tab-${id}`, terminalTitle: id === 't2' ? 'Herdr dashboard' : null,
+    agentKind: kind, agentSessionReference: null, isFocused: focused, status,
   };
 }
 
 function snapshot(teams: TeamSpec[]): SourceSnapshot {
-  return { teams: teams.map(([id, label, agents]) => ({ id, label, agents })) };
+  return {
+    teams: teams.map(([id, label, agents]) => ({
+      id, label, agents,
+      tabs: agents.map(a => ({ id: a.tabID, label: a.tabLabel })),
+    })),
+  };
 }
 
 /** Boots a live race, lets everyone work for staggered spans so distances

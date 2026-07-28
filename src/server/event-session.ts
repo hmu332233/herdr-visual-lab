@@ -1,4 +1,4 @@
-import type { GameEventBody, EventTeam, EventUnit, EventUnitProfile } from '../shared/events.js';
+import type { GameEventBody, EventTeam, EventUnit, EventUnitProfile, TopologyTeam } from '../shared/events.js';
 import type { ConnectionState } from '../shared/presentation.js';
 import type { HerdrUpdate, SourceAgent, SourceSnapshot } from './herdr/types.js';
 import { createEventLog, type EventLog } from './event-log.js';
@@ -14,7 +14,12 @@ const sameConnection = (a: ConnectionState, b: ConnectionState): boolean =>
     (b.kind === 'protocolError' && a.detail === b.detail));
 
 const profileOf = (teamID: string, agent: SourceAgent): EventUnitProfile => ({
-  teamID, tabLabel: agent.tabLabel, agentKind: agent.agentKind, isFocused: agent.isFocused,
+  teamID,
+  tabLabel: agent.tabLabel,
+  tabID: agent.tabID,
+  terminalTitle: agent.terminalTitle,
+  agentKind: agent.agentKind,
+  isFocused: agent.isFocused,
 });
 
 export function createEventSession(log: EventLog = createEventLog(), initialRate = 1) {
@@ -24,6 +29,7 @@ export function createEventSession(log: EventLog = createEventLog(), initialRate
   let lastTick: number | null = null;
   let connection: ConnectionState = { kind: 'waiting' };
   let hasSnapshot = false;
+  let topologyKey: string | null = null;
   let nextTeamSource = 0;
   let nextUnitSource = 0;
   const teams = new Map<string, KnownTeam>();
@@ -64,10 +70,23 @@ export function createEventSession(log: EventLog = createEventLog(), initialRate
       .forEach((unit, index, all) => { unit.stableOrder = units.size - all.length + index; });
   }
 
-  function applySnapshot(snapshot: SourceSnapshot, now: number): void {
+  function applySnapshot(source: SourceSnapshot, now: number): void {
     advance(now);
+    // Team/unit events stay agent-only so existing game folds never see
+    // empty teams; the full hierarchy travels in topology-changed instead.
+    const snapshot: SourceSnapshot = { teams: source.teams.filter(team => team.agents.length > 0) };
     assignOrdinals(snapshot);
     const bodies: GameEventBody[] = [];
+    const topology: TopologyTeam[] = source.teams.map(team => ({
+      id: team.id,
+      label: team.label,
+      tabs: (team.tabs ?? []).map(tab => ({ id: tab.id, label: tab.label })),
+    }));
+    const nextTopologyKey = JSON.stringify(topology);
+    if (nextTopologyKey !== topologyKey) {
+      topologyKey = nextTopologyKey;
+      bodies.push({ kind: 'topology-changed', teams: topology });
+    }
     const seenTeams = new Set<string>();
     const seenUnits = new Set<string>();
     const incoming = new Map<string, { teamID: string; agent: SourceAgent }>();
@@ -109,6 +128,7 @@ export function createEventSession(log: EventLog = createEventLog(), initialRate
         if (unit.status !== agent.status) bodies.push({ kind: 'status-changed', unitID: unit.id, from: unit.status, to: agent.status });
         if (restarted) bodies.push({ kind: 'unit-session-restarted', unitID: unit.id });
         if (unit.teamID !== profile.teamID || unit.tabLabel !== profile.tabLabel ||
+            unit.tabID !== profile.tabID || unit.terminalTitle !== profile.terminalTitle ||
             unit.agentKind !== profile.agentKind || unit.isFocused !== profile.isFocused) {
           bodies.push({ kind: 'unit-profile-changed', unitID: unit.id, profile });
         }

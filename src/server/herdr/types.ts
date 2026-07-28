@@ -7,6 +7,8 @@ export interface SourceAgent {
   paneID: string;
   workspaceID: string;
   tabLabel: string;
+  tabID: string;
+  terminalTitle: string | null;
   agentKind: string;
   /** Opaque session identity used only for NEW STINT detection.
    *  Must never appear in visible text. */
@@ -15,10 +17,19 @@ export interface SourceAgent {
   status: AgentStatus;
 }
 
-/** One herdr workspace acting as a racing team. */
+/** One herdr tab, present even when no agent runs inside it. */
+export interface SourceTab {
+  id: string;
+  label: string;
+}
+
+/** One herdr workspace acting as a racing team. A workspace is included
+ *  even when it currently hosts no agents; `tabs` lists every tab in
+ *  authoritative order, agent-less tabs included. */
 export interface SourceTeam {
   id: string;
   label: string;
+  tabs: SourceTab[];
   agents: SourceAgent[];
 }
 
