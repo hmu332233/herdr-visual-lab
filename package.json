@@ -1,10 +1,10 @@
 {
-  "name": "herdr-games",
+  "name": "herdr-visual-lab",
   "version": "0.1.0",
   "type": "module",
-  "description": "A playful live dashboard that reimagines your Herdr coding agents as galaxies, races, raids, kanban boards, and more.",
+  "description": "A playground for exploring playful visual interpretations of live Herdr coding-agent sessions.",
   "bin": {
-    "herdr-games": "bin/herdr-games.js"
+    "herdr-visual-lab": "bin/herdr-visual-lab.js"
   },
   "files": [
     "bin",
@@ -17,7 +17,7 @@
   },
   "scripts": {
     "build": "vite build && tsc -p tsconfig.server.json",
-    "start": "node bin/herdr-games.js",
+    "start": "node bin/herdr-visual-lab.js",
     "prepack": "npm run build",
     "dev:server": "tsx src/server/cli.ts start --no-open",
     "dev:web": "vite",
