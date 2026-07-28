@@ -15,8 +15,8 @@ let dashboard: Dashboard | null = null;
 let webRoot = '';
 
 async function makeServer(onFocus: (id: string) => void = () => {}): Promise<Dashboard> {
-  webRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'herdr-f1-web-'));
-  fs.writeFileSync(path.join(webRoot, 'index.html'), '<!doctype html><title>Herdr F1</title>');
+  webRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'herdr-games-web-'));
+  fs.writeFileSync(path.join(webRoot, 'index.html'), '<!doctype html><title>Herdr Games</title>');
   fs.writeFileSync(path.join(webRoot, 'app.js'), 'console.log(1)');
   const session = createEventSession();
   loadFixture('grid', session);
@@ -37,7 +37,7 @@ describe('startServer', () => {
     const home = await fetch(`http://127.0.0.1:${port}/`);
     expect(home.status).toBe(200);
     expect(home.headers.get('content-type')).toContain('text/html');
-    expect(await home.text()).toContain('Herdr F1');
+    expect(await home.text()).toContain('Herdr Games');
     const js = await fetch(`http://127.0.0.1:${port}/app.js`);
     expect(js.status).toBe(200);
     expect(js.headers.get('content-type')).toContain('text/javascript');

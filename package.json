@@ -1,22 +1,23 @@
 {
-  "name": "herdr-f1",
+  "name": "herdr-games",
   "version": "0.1.0",
   "type": "module",
-  "description": "Herdr F1 — watch your coding agents race in the browser",
+  "description": "A playful live dashboard that reimagines your Herdr coding agents as galaxies, races, raids, kanban boards, and more.",
   "bin": {
-    "herdr-f1": "bin/herdr-f1.js"
+    "herdr-games": "bin/herdr-games.js"
   },
   "files": [
     "bin",
     "dist",
-    "README.md"
+    "README.md",
+    "README.KR.md"
   ],
   "engines": {
     "node": ">=20"
   },
   "scripts": {
     "build": "vite build && tsc -p tsconfig.server.json",
-    "start": "node bin/herdr-f1.js",
+    "start": "node bin/herdr-games.js",
     "prepack": "npm run build",
     "dev:server": "tsx src/server/cli.ts start --no-open",
     "dev:web": "vite",

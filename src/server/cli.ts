@@ -19,7 +19,7 @@ export interface CliOptions {
 /** Server-wide multiplier applied on top of each game's default tempo. */
 export const DEFAULT_SPEED = 1;
 
-const USAGE = `Usage: herdr-f1 [start] [--port <n>] [--no-open] [--fixture <${FIXTURE_NAMES.join('|')}>] [--socket <path>] [--speed <n>]`;
+const USAGE = `Usage: herdr-games [start] [--port <n>] [--no-open] [--fixture <${FIXTURE_NAMES.join('|')}>] [--socket <path>] [--speed <n>]`;
 class UsageError extends Error {}
 
 export function parseArgs(argv: string[]): CliOptions {
@@ -112,7 +112,7 @@ export async function run(argv: string[]): Promise<void> {
 
   const url = `http://127.0.0.1:${dashboard.port}`;
   console.log(
-    `Herdr F1 · ${url}${options.fixture ? ` · fixture: ${options.fixture}` : ''}` +
+    `Herdr Games · ${url}${options.fixture ? ` · fixture: ${options.fixture}` : ''}` +
       `${options.speed === 1 ? '' : ` · speed: ${options.speed}×`}`,
   );
   console.log('Press Ctrl+C to stop.');
