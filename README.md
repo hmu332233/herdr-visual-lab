@@ -1,8 +1,8 @@
-# Herdr Games
+# Herdr Visual Lab
 
 English | [한국어](./README.KR.md)
 
-Herdr Games is a dashboard playground for experimenting with more entertaining
+Herdr Visual Lab is a dashboard playground for experimenting with more entertaining
 ways to watch coding agents work in Herdr.
 
 It reimagines a single live session as different worlds—a galaxy, a race, a
@@ -20,22 +20,22 @@ Requirements:
 npm install
 npm run build
 npm link
-herdr-games
+herdr-visual-lab
 ```
 
-Herdr Games opens `http://127.0.0.1:4158` in your default browser. Press
+Herdr Visual Lab opens `http://127.0.0.1:4158` in your default browser. Press
 `Ctrl+C` in the terminal to stop it.
 
 To preview the dashboard without Herdr, run it with a fixture:
 
 ```sh
-herdr-games --fixture grid
+herdr-visual-lab --fixture grid
 ```
 
 Available options:
 
 ```text
-herdr-games [options]
+herdr-visual-lab [options]
 
 --port <n>        Set the starting port (default: 4158)
 --no-open         Do not open the browser automatically

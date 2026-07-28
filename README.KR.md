@@ -1,4 +1,4 @@
-# Herdr Games
+# Herdr Visual Lab
 
 [English](./README.md) | 한국어
 
@@ -20,7 +20,7 @@ Herdr에서 일하는 코딩 에이전트를 더 재미있게 바라보는 방�
 npm install
 npm run build
 npm link
-herdr-games
+herdr-visual-lab
 ```
 
 실행하면 `http://127.0.0.1:4158`이 기본 브라우저에서 열립니다. 종료하려면
@@ -29,13 +29,13 @@ herdr-games
 Herdr 없이 화면만 확인하려면 fixture를 사용합니다.
 
 ```sh
-herdr-games --fixture grid
+herdr-visual-lab --fixture grid
 ```
 
 사용 가능한 옵션:
 
 ```text
-herdr-games [options]
+herdr-visual-lab [options]
 
 --port <n>        시작 포트 지정 (기본값: 4158)
 --no-open         브라우저를 자동으로 열지 않음
